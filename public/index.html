@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Clientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 16px;
+            text-align: left;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .cliente {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .cliente h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .cliente p {
+            margin-bottom: 5px;
+        }
+        .acao {
+            margin-top: 20px;
+        }
+        .acao button {
+            margin-right: 10px;
+        }
+        .search-container {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .search-container input[type="text"] {
+            width: calc(50% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .search-container select {
+            width: calc(50% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M3 6h18M3 18h18"></path></svg>');
+            background-repeat: no-repeat;
+            background-position-x: calc(100% - 10px);
+            background-position-y: center;
+            padding-right: 30px;
+        }
+        .search-container input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .15s ease-in-out;
+            border-radius: 5px;
+        }
+        .search-container input[type="range"]:hover {
+            opacity: 1;
+        }
+        .search-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .search-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .cancelar {
+            background-color: #f44336;
+        }
+        .cancelar:hover {
+            background-color: #d32f2f;
+        }
+        .pagination {
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin-right: 5px;
+            background-color: #ddd;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination button.active {
+            background-color: #4caf50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cadastro de Clientes</h2>
+        
+        <button onclick="abrirFormulario()">Criar Novo Cadastro</button>
+        
+        <div id="formulario" style="display: none;">
+            <!-- Formulário para adicionar/editar cliente -->
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="busca" oninput="buscarCliente()" placeholder="Buscar Cliente por CPF">
+            <select id="ordenar-por" onchange="ordenarClientes()">
+                <option value="nome">Ordenar por Nome</option>
+                <option value="cpf">Ordenar por CPF</option>
+                <option value="idade">Ordenar por Idade</option>
+                <option value="endereco">Ordenar por Endereço</option>
+            </select>
+            <input type="range" id="filtro-idade" min="0" max="100" value="0" oninput="filtrarPorIdade()">
+            <span id="idade-minima">Idade mínima: 0</span>
+        </div>
+
+        <div id="clientes" class="clientes">
+            <!-- Os clientes cadastrados serão exibidos aqui -->
+        </div>
+        
+        <div class="acao">
+            <button onclick="downloadScriptSQL()">Download SQL</button>
+            <input type="file" id="fileInput" accept=".csv">
+            <button onclick="processarArquivoSQL()">Upload SQL</button>
+        </div>
+        
+        <div id="pagination" class="pagination">
+            <!-- Paginação será adicionada aqui -->
+        </div>
+    </div>
+    
+    <script>
+        var listaClientes = [];
+        var itensPorPagina = 5;
+        var paginaAtual = 1;
+        var proximoId = 1; // Variável para armazenar o próximo ID único
+
+        // Carregar clientes do servidor ao carregar a página
+        window.onload = function() {
+            carregarClientes();
+        };
+
+        // Função para carregar clientes do servidor
+        async function carregarClientes() {
+            try {
+                const response = await fetch('/api/clientes');
+                if (!response.ok) {
+                    throw new Error('Não foi possível carregar os clientes.');
+                }
+                listaClientes = await response.json();
+                proximoId = Math.max(...listaClientes.map(cliente => cliente.id), 0) + 1; // Atualiza o próximo ID baseado nos IDs existentes
+                atualizarClientes();
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        // Abrir formulário para adicionar novo cliente
+        function abrirFormulario() {
+            document.getElementById('formulario').style.display = 'block';
+            document.getElementById('formulario').innerHTML = `
+                <h3 id="form-title">Novo Cadastro</h3>
+                <input type="hidden" id="cliente-id">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" placeholder="Digite o nome">
+
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" placeholder="Digite o CPF">
+
+                <label for="idade">Idade:</label>
+                <input type="number" id="idade" placeholder="Digite a idade">
+
+                <label for="endereco">Endereço:</label>
+                <input type="text" id="endereco" placeholder="Digite o endereço">
+
+                <button id="salvar-button" onclick="salvarCadastro()">Salvar</button>
+                <button class="cancelar" onclick="cancelarCadastro()">Cancelar</button>
+            `;
+            limparFormulario();
+        }
+
+        // Cancelar cadastro ou edição
+        function cancelarCadastro() {
+            document.getElementById('formulario').style.display = 'none';
+            limparFormulario();
+        }
+
+        // Salvar novo cadastro ou editar cadastro existente
+        async function salvarCadastro() {
+            var id = document.getElementById('cliente-id').value;
+            var nome = document.getElementById('nome').value.trim();
+            var cpf = document.getElementById('cpf').value.trim();
+            var idade = document.getElementById('idade').value.trim();
+            var endereco = document.getElementById('endereco').value.trim();
+
+            if (!nome || !cpf || !idade || !endereco) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
+            var cliente = { id: id ? parseInt(id) : proximoId++, nome, cpf, idade, endereco };
+
+            // Verificar se é um novo cliente ou edição de um existente
+            var index = listaClientes.findIndex(c => c.id === cliente.id);
+            if (index !== -1) {
+                // Editar cliente existente
+                listaClientes[index] = cliente;
+            } else {
+                // Adicionar novo cliente
+                listaClientes.push(cliente);
+            }
+
+            // Atualizar interface
+            atualizarClientes();
+
+            // Salvar clientes no servidor
+            await salvarClientesServidor();
+            
+            // Fechar formulário após salvar
+            cancelarCadastro();
+        }
+                
+        // Editar cliente existente
+        function editarCliente(id) {
+            var cliente = listaClientes.find(c => c.id === id);
+            if (cliente) {
+                abrirFormulario();
+                document.getElementById('form-title').innerText = 'Editar Cadastro';
+                document.getElementById('cliente-id').value = cliente.id;
+                document.getElementById('nome').value = cliente.nome;
+                document.getElementById('cpf').value = cliente.cpf;
+                document.getElementById('idade').value = cliente.idade;
+                document.getElementById('endereco').value = cliente.endereco;
+            }
+        }
+
+        // Remover cliente pelo ID
+        async function removerCliente(id) {
+            if (confirm('Tem certeza que deseja remover este cliente?')) {
+                try {
+                    const response = await fetch(`/api/remover-cliente/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) {
+                        throw new Error('Erro ao remover cliente.');
+                    }
+                    await carregarClientes(); // Recarregar lista de clientes após remoção
+                } catch (error) {
+                    console.error('Erro ao remover cliente:', error);
+                    alert('Erro ao remover cliente. Verifique sua conexão de rede ou tente novamente mais tarde.');
+                }
+            }
+        }
+
+        // Salvar lista de clientes no servidor
+        async function salvarClientesServidor() {
+            try {
+                const response = await fetch('/api/salvar-clientes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ clientes: listaClientes })
+                });
+                if (!response.ok) {
+                    throw new Error('Erro ao salvar clientes no servidor.');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar clientes no servidor:', error);
+                alert('Erro ao salvar clientes no servidor. Verifique sua conexão de rede ou tente novamente mais tarde.');
+            }
+        }
+
+        // Download de script SQL
+        async function downloadScriptSQL() {
+        try {
+            const response = await fetch('/api/download-sql');
+            if (!response.ok) {
+                throw new Error('Erro ao baixar script SQL: ' + response.status);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'script.sql';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Erro ao baixar script SQL:', error);
+            alert('Erro ao baixar script SQL. Verifique sua conexão de rede ou tente novamente mais tarde.');
+        }
+    }
+        // Processar arquivo SQL enviado pelo usuário
+        async function processarArquivoSQL() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+
+            if (!file) {
+                alert('Selecione um arquivo SQL para upload.');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload-sql', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar arquivo SQL.');
+                }
+                await carregarClientes(); // Recarregar lista de clientes após upload
+            } catch (error) {
+                console.error('Erro ao enviar arquivo SQL:', error);
+                alert('Erro ao enviar arquivo SQL. Verifique sua conexão de rede ou tente novamente mais tarde.');
+            }
+        }
+
+        // Limpar formulário de cadastro
+        function limparFormulario() {
+            document.getElementById('cliente-id').value = '';
+            document.getElementById('nome').value = '';
+            document.getElementById('cpf').value = '';
+            document.getElementById('idade').value = '';
+            document.getElementById('endereco').value = '';
+        }
+
+        // Atualizar paginação
+        function atualizarPaginacao(totalItens) {
+            var totalPaginas = Math.ceil(totalItens / itensPorPagina);
+            var paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                var button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = function() {
+                    paginaAtual = i;
+                    atualizarClientes();
+                };
+                paginationDiv.appendChild(button);
+            }
+        }
+
+        // Buscar cliente por CPF
+        var debounceTimer;
+        function buscarCliente() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                var termo = document.getElementById('busca').value.trim().toLowerCase();
+                if (!termo) {
+                    atualizarClientes();
+                    return;
+                }
+                var resultados = listaClientes.filter(cliente => cliente.cpf.toLowerCase().includes(termo));
+                exibirClientes(resultados);
+            }, 300); // Atraso de 300ms antes de executar a busca
+        }
+
+        // Função para ordenar os clientes com base no critério selecionado
+        function ordenarClientes() {
+            var criterio = document.getElementById('ordenar-por').value;
+            listaClientes.sort((a, b) => {
+                if (a[criterio] < b[criterio]) return -1;
+                if (a[criterio] > b[criterio]) return 1;
+                return 0;
+            });
+            atualizarClientes();
+        }
+
+        // Função para filtrar os clientes por idade mínima
+        function filtrarPorIdade() {
+            var idadeMinima = document.getElementById('filtro-idade').value;
+            document.getElementById('idade-minima').textContent = `Idade mínima: ${idadeMinima}`;
+            var resultados = listaClientes.filter(cliente => cliente.idade >= idadeMinima);
+            exibirClientes(resultados);
+        }
+
+        // Função auxiliar para atualizar clientes na interface
+        function atualizarClientes() {
+            var startIndex = (paginaAtual - 1) * itensPorPagina;
+            var endIndex = startIndex + itensPorPagina;
+            var paginatedClientes = listaClientes.slice(startIndex, endIndex);
+            exibirClientes(paginatedClientes);
+            atualizarPaginacao(listaClientes.length);
+        }
+
+        // Função auxiliar para exibir clientes na interface
+        function exibirClientes(clientes) {
+            var clientesContainer = document.getElementById('clientes');
+            clientesContainer.innerHTML = '';
+
+            clientes.forEach(cliente => {
+                var clienteDiv = document.createElement('div');
+                clienteDiv.classList.add('cliente');
+                clienteDiv.innerHTML = `
+                    <p><strong>Nome:</strong> ${cliente.nome}</p>
+                    <p><strong>CPF:</strong> ${cliente.cpf}</p>
+                    <p><strong>Idade:</strong> ${cliente.idade}</p>
+                    <p><strong>Endereço:</strong> ${cliente.endereco}</p>
+                    <button onclick="editarCliente(${cliente.id})">Editar</button>
+                    <button onclick="removerCliente(${cliente.id})">Remover</button>
+                `;
+                clientesContainer.appendChild(clienteDiv);
+            });
+        }
+    </script>
+</body>
+</html>
